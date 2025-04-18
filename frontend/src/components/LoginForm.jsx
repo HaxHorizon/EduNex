@@ -1,35 +1,40 @@
-import { useState } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import "react-toastify/dist/ReactToastify.css";
 
 const LoginForm = ({ projectName = "Edunex" }) => {
   const [userType, setUserType] = useState('student');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     if (!email || !password) {
       toast.error("Please enter both email and password");
       return;
     }
-
+  
     try {
       const res = await fetch("http://localhost:5000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, userType }),
       });
-
+  
       const data = await res.json();
-
+  
       if (res.ok) {
         toast.success("Login successful");
+  
+        // Store the token in localStorage
+        localStorage.setItem("token", data.token); // Store the token here
+  
         setTimeout(() => {
-          window.location.href = "https://www.youtube.com";
-        }, 1000);  // Redirect after 1 second
+          navigate("/student", { state: { studentName: data.name } });
+        }, 1000);
       } else {
         toast.error(data.message || "Login failed");
       }
@@ -38,6 +43,7 @@ const LoginForm = ({ projectName = "Edunex" }) => {
       console.error("Login error:", error);
     }
   };
+  
 
   return (
     <div className="p-12 bg-white h-full flex flex-col justify-center items-center text-center text-gray-700">
@@ -87,11 +93,6 @@ const LoginForm = ({ projectName = "Edunex" }) => {
         className="w-full p-3 mb-4 bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
         required 
       />
-
-      <a href="#" className="text-blue-600 text-sm hover:text-blue-700 transition-colors mb-6">
-        Forgot your password?
-      </a>
-
       <button 
         type="submit"
         onClick={handleLogin}
@@ -99,7 +100,6 @@ const LoginForm = ({ projectName = "Edunex" }) => {
       >
         Sign In
       </button>
-
     </div>
   );
 };
