@@ -29,11 +29,14 @@ const LoginForm = ({ projectName = "Edunex" }) => {
       if (res.ok) {
         toast.success("Login successful");
   
-        // Store the token in localStorage
-        localStorage.setItem("token", data.token); // Store the token here
+        localStorage.setItem("token", data.token);
   
         setTimeout(() => {
-          navigate("/student", { state: { studentName: data.name } });
+          if (userType === "teacher") {
+            navigate("/teacher");
+          } else {
+            navigate("/student", { state: { studentName: data.name } });
+          }
         }, 1000);
       } else {
         toast.error(data.message || "Login failed");

@@ -12,6 +12,8 @@ import http from "http";
 import { Server } from "socket.io";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import announcementsRoute from "./routes/announcementRoutes.js";
+import profileRoutes from "./routes/profile.js";
 
 dotenv.config();
 
@@ -33,12 +35,9 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((err) => {
-    console.error("MongoDB connection error:", err);
-  });
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
+
 
 app.post("/api/register", async (req, res) => {
   try {
@@ -64,7 +63,7 @@ app.post("/api/register", async (req, res) => {
 
     await newUser.save();
 
-    // Send formatted email
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -78,43 +77,43 @@ app.post("/api/register", async (req, res) => {
       to: "teamhaxhorizon@gmail.com",
       subject: "📝 New User Registered on Edunex",
       html: `
-  <h2 style="color:#2e6c80;">📋 New User Registration - Edunex</h2>
-  <table style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif;">
-    <thead>
-      <tr style="background-color: #f2f2f2;">
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Field</th>
-        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Value</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td style="border: 1px solid #ddd; padding: 8px;">EID</td>
-        <td style="border: 1px solid #ddd; padding: 8px;">${eid}</td>
-      </tr>
-      <tr>
-        <td style="border: 1px solid #ddd; padding: 8px;">Full Name</td>
-        <td style="border: 1px solid #ddd; padding: 8px;">${fullName}</td>
-      </tr>
-      <tr>
-        <td style="border: 1px solid #ddd; padding: 8px;">Email</td>
-        <td style="border: 1px solid #ddd; padding: 8px;">${email}</td>
-      </tr>
-      <tr>
-        <td style="border: 1px solid #ddd; padding: 8px;">User Type</td>
-        <td style="border: 1px solid #ddd; padding: 8px;">${userType}</td>
-      </tr>
-      <tr>
-        <td style="border: 1px solid #ddd; padding: 8px;">
-          ${userType === "student" ? "Grade/Class" : "Subject Specialization"}
-        </td>
-        <td style="border: 1px solid #ddd; padding: 8px;">${extraInfo}</td>
-      </tr>
-    </tbody>
-  </table>
-  <p style="margin-top:20px; font-size: 0.9em; color: #888;">
-    This is an automated message from Edunex.
-  </p>
-`,
+        <h2 style="color:#2e6c80;">📋 New User Registration - Edunex</h2>
+        <table style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif;">
+          <thead>
+            <tr style="background-color: #f2f2f2;">
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Field</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border: 1px solid #ddd; padding: 8px;">EID</td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${eid}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #ddd; padding: 8px;">Full Name</td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${fullName}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #ddd; padding: 8px;">Email</td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${email}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #ddd; padding: 8px;">User Type</td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${userType}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #ddd; padding: 8px;">
+                ${userType === "student" ? "Grade/Class" : "Subject Specialization"}
+              </td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${extraInfo}</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="margin-top:20px; font-size: 0.9em; color: #888;">
+          This is an automated message from Edunex.
+        </p>
+      `,
     };
 
     await transporter.sendMail(mailOptions);
@@ -149,13 +148,13 @@ app.post("/api/register", async (req, res) => {
 
     await transporter.sendMail(userMailOptions);
 
-
     res.status(201).json({ message: "User registered & email sent" });
   } catch (err) {
     console.error("Error in /api/register:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 app.post("/api/login", async (req, res) => {
   try {
@@ -169,30 +168,36 @@ app.post("/api/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign(
-      { userId: user._id, userType: user.userType },
-      SECRET_KEY,
-      { expiresIn: "1h" }
-    );
+    const token = jwt.sign({ userId: user._id, userType }, SECRET_KEY, { expiresIn: "1h" });
 
-    res.status(200).json({ message: "Login successful", token });
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        userType: user.userType,
+      },
+    });
   } catch (err) {
     console.error("Error in /api/login:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
+//mdw
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1];
-  if (!token) return res.sendStatus(401);
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "No token provided" });
 
   jwt.verify(token, SECRET_KEY, (err, user) => {
-    if (err) return res.sendStatus(403);
+    if (err) return res.status(403).json({ message: "Invalid token" });
     req.user = user;
     next();
   });
 };
+
 
 app.get("/api/me", authenticateToken, async (req, res) => {
   try {
@@ -205,93 +210,12 @@ app.get("/api/me", authenticateToken, async (req, res) => {
   }
 });
 
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const UPLOAD_DIR = path.join(__dirname, "uploads");
-
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR);
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, UPLOAD_DIR);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const fileName = `profile_${req.user.userId}${ext}`;
-    cb(null, fileName);
-  }
-});
-
-const upload = multer({ storage });
-
-// GET /api/profile - fetch current profile
-app.get("/api/profile", authenticateToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const profile = await Profile.findOne({ eid: user.eid });
-    if (!profile) return res.status(404).json({ message: "Profile not found" });
-
-    const profileImageUrl = `/uploads/profile_${user._id}.jpg`; // Assuming JPG
-
-    res.json({
-      ...profile.toObject(),
-      profileImageUrl
-    });
-  } catch (err) {
-    console.error("Error fetching profile:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// POST /api/profile - create or update profile
-app.post("/api/profile", authenticateToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const data = req.body;
-    const existing = await Profile.findOne({ eid: user.eid });
-
-    if (existing) {
-      await Profile.updateOne({ eid: user.eid }, data);
-    } else {
-      const newProfile = new Profile({ ...data, eid: user.eid });
-      await newProfile.save();
-    }
-
-    res.json({ message: "Profile saved successfully" });
-  } catch (err) {
-    console.error("Error saving profile:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// POST /api/profile/image - upload profile image
-app.post("/api/profile/image", authenticateToken, upload.single("profileImage"), (req, res) => {
-  try {
-    const imageUrl = `/uploads/${req.file.filename}`;
-    res.json({ message: "Image uploaded", imageUrl });
-  } catch (err) {
-    console.error("Error uploading image:", err);
-    res.status(500).json({ message: "Image upload failed" });
-  }
-});
-
-// Serve uploaded images statically
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static("uploads"));
+app.use("/api/profile", profileRoutes);
 
 
-app.get("/api/users", authenticateToken, async (req, res) => {
-  const users = await User.find({ _id: { $ne: req.user.userId } }).select(
-    "fullName email _id"
-  );
-  res.json(users);
-});
+app.use("/api/announcements", announcementsRoute);
+// Start Server
 server.listen(5000, () => {
-  console.log("Server running on http://localhost:5000");
+  console.log("🚀 Server running on http://localhost:5000");
 });

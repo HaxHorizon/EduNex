@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { User, LogOut, Users, MessageCircle, Video, Book, Bell, Search, Calendar, Settings } from "lucide-react";
 import { io } from "socket.io-client";
+import { Outlet } from 'react-router-dom';
+
 const FeatureCard = ({ title, description, buttonText, icon: Icon, onClick, color = "blue" }) => {
   const colorClasses = {
     blue: "bg-blue-100 border-blue-300 hover:bg-blue-200",
@@ -113,8 +115,8 @@ const StudentDashboard = () => {
           setEid(data.eid);
 
           setNotifications([
-            { id: 1, message: "New message from Study Group", time: "10 minutes ago" },
-            { id: 2, message: "Physics homework reminder", time: "1 hour ago" }
+            { id: 1, message: "Welcome to Edunex", time: "Just Now" },
+            { id: 2, message: "Ensure to Build your Profile", time: "1 min ago" }
           ]);
         } else {
           localStorage.removeItem("token");
@@ -185,6 +187,7 @@ const StudentDashboard = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-100">
+      <Outlet />
       <div className="bg-blue-600 text-white p-4 shadow-md flex justify-between items-center">
         <div className="text-4xl font-extrabold flex items-center">
           <span className="text-white">Edu</span>
