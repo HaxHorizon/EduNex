@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FiLogOut } from 'react-icons/fi';
+import { Outlet } from 'react-router-dom';
+
 import { 
   User, 
   Mail, 
@@ -721,12 +723,13 @@ const StudentProfile = () => {
                       onChange={(e) => handleProfileChange("academicInfo", "year", e.target.value)}
                       className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="">Select Year</option>
-                      <option value="Freshman">Freshman</option>
-                      <option value="Sophomore">Sophomore</option>
-                      <option value="Junior">Junior</option>
-                      <option value="Senior">Senior</option>
-                      <option value="Graduate">Graduate</option>
+                      <option value="">Select Academic Year</option>
+<option value="Freshman">Freshman - 1st Year</option>
+<option value="Sophomore">Sophomore - 2nd Year</option>
+<option value="Junior">Junior - 3rd Year</option>
+<option value="Senior">Senior - 4th Year</option>
+<option value="Graduate">Graduate - Post-Bachelor</option>
+
                     </select>
                   ) : (
                     <div className="flex items-center">

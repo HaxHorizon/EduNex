@@ -5,6 +5,7 @@ import RegisterForm from '../components/RegisterForm';
 import OverlayPanel from '../components/OverlayPanel';
 import { ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
+import { Outlet } from 'react-router-dom';
 function Auth() {
   const [isRightPanelActive, setIsRightPanelActive] = useState(false);
 
@@ -14,6 +15,7 @@ function Auth() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50 p-4">
+      <Outlet />
        <ToastContainer position="top-right" />
       <div className={`relative overflow-hidden bg-white rounded-2xl shadow-xxxl w-full max-w-3xl min-h-[500px] inc shadow`}>
         <div 

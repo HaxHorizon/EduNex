@@ -5,6 +5,7 @@ import StudentDashboard from "./dashboard/studentdash";
 import OneToOneChat from "./obj/ChatPage";
 import VideoCall from "./obj/NexCall";
 import StudentProfile from "./components/Profile";
+import TeacherDashboard from "./dashboard/TeacherDashboard";
 function App() {
   return (
     <Router>
@@ -15,6 +16,7 @@ function App() {
         <Route path="/student/chat" element={<OneToOneChat />} />
         <Route path="/student/nexcall" element={<VideoCall />} />
         <Route path="/student/profile" element={<StudentProfile />} />
+        <Route path="/teacher" element={<TeacherDashboard />} />
       </Routes>
     </Router>
   );
